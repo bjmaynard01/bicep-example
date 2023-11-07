@@ -1,0 +1,23 @@
+on: [push]
+name: Azure ARM
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+          # checkout code
+        - uses: actions/checkout@main
+
+          #login to azure
+        - uses: azure/login@v1
+          with:
+            creds: ${{ secrets.AZURE_CREDS}}
+
+          # deploy bicep file
+        - name: deploy
+          uses: azure/arm-deploy@v1
+          with:
+              subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+              resrouceGroupName: ${{ secretes.AZURE_RG }}
+              template: main.bicep
+              parameters: 'stroagePrefix=mystore storageSKU=Standard_LRS'
+              failOnStdErr: false
