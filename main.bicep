@@ -1,34 +1,34 @@
-@minLength(3)
-@maxLength(11)
-param storagePrefix string
+param location string = 'westus3'
+param storageAccountName string = 'toylaunch${uniqueString(resourceGroup().id)}'
+param appServiceAppName string = 'toylaunch${uniqueString(resourceGroup().id)}'
 
 @allowed([
-  'Standard_LRS'
-  'Standard_GRS'
-  'Standard_RAGRS'
-  'Standard_ZRS'
-  'Premium_LRS'
-  'Premium_ZRS'
-  'Standard_GZRS'
-  'Standard_RAGZRS'
+  'nonprod'
+  'prod'
 ])
+param environmentType string
 
-param storageSKU string = 'Standard_LRS'
+var storageAccountSkuName = (environmentType == 'prod') ? 'Standard_GRS' : 'Standard_LRS'
 
-param location string= resourceGroup().location
-
-var uniqueStorageName = '${storagePrefix}${uniqueString(resourceGroup().id)}'
-
-resource stg 'Microsoft.Storage/storageAccounts@2021-04-01' = {
-  name: uniqueStorageName
+resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
+  name: storageAccountName
   location: location
   sku: {
-    name: storageSKU
+    name: storageAccountSkuName
   }
   kind: 'StorageV2'
   properties: {
-    supportsHttpsTrafficOnly: true
+    accessTier: 'Hot'
   }
 }
 
-output storageEndpoint object = stg.properties.primaryEndpoints
+module appService 'modules/appService.bicep' = {
+  name: 'appService'
+  params: {
+    location: location
+    appServiceAppName: appServiceAppName
+    environmentType: environmentType
+  }
+}
+
+output appServiceAppHostName string = appService.outputs.appServiceAppHostName
