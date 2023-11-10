@@ -19,15 +19,15 @@ pool:
   vmImage: $(vmImageName)
 
 steps:
-  - task:
-    inputs:
-      deploymentScope: 'Resource Group'
-      azureResourceManagerConnection: '$(azureServiceConnection)'
-      action: 'Create or update resource group'
-      resourceGroupName: '$(resourceGroupName)'
-      location: '$(location)'
-      templateLocation: Linked artifact
-      csmFile: '$(templateFile)'
-      overrideParameters: '-storageAccountType Standard_LRS'
-      deploymentMode: 'Incremental'
-      deploymentName: 'DeployPipelineTemplate'
+- task: AzureResourceManagerTemplateDeployment@3
+  inputs:
+    deploymentScope: 'Resource Group'
+    azureResourceManagerConnection: '$(azureServiceConnection)'
+    action: 'Create or update resource group'
+    resourceGroupName: '$(resourceGroupName)'
+    location: '$(location)'
+    templateLocation: Linked artifact
+    csmFile: '$(templateFile)'
+    overrideParameters: '-storageAccountType Standard_LRS'
+    deploymentMode: 'Incremental'
+    deploymentName: 'DeployPipelineTemplate'
